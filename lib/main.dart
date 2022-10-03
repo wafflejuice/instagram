@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:instagram/style.dart';
 
 void main() {
@@ -23,6 +26,22 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   var tab = 0;
+  var fetchedResult;
+
+  fetchData() async {
+    var response = await http
+        .get(Uri.parse('https://codingapple1.github.io/app/data.json'));
+    var result = jsonDecode(response.body);
+    setState(() {
+      fetchedResult = result;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +55,7 @@ class _MyAppState extends State<MyApp> {
           )
         ],
       ),
-      body: [Home(), Text('Shop page')][tab],
+      body: [Home(result: fetchedResult), Text('Shop page')][tab],
       bottomNavigationBar: BottomNavigationBar(
           onTap: (i) {
             setState(() {
@@ -54,38 +73,41 @@ class _MyAppState extends State<MyApp> {
 }
 
 class Home extends StatelessWidget {
-  const Home({
-    Key? key,
-  }) : super(key: key);
+  const Home({Key? key, this.result}) : super(key: key);
+
+  final result;
 
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: 3,
+      itemCount: result.length,
       itemBuilder: (context, index) {
-        return Post();
+        return Post(result: result, index: index);
       },
     );
   }
 }
 
 class Post extends StatelessWidget {
-  const Post({Key? key}) : super(key: key);
+  const Post({Key? key, this.result, required this.index}) : super(key: key);
+
+  final result;
+  final int index;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Image.asset('assets/street.jpg'),
+        Image.network(result[index]['image']),
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('favorite 100',
+              Text('favorite ${result[index]['likes']}',
                   style: TextStyle(fontWeight: FontWeight.bold)),
-              Text('writer'),
-              Text('content'),
+              Text(result[index]['user']),
+              Text(result[index]['content']),
             ],
           ),
         )
