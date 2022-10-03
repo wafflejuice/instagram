@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:instagram/style.dart';
 
 void main() {
   runApp(App());
@@ -9,16 +10,7 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        theme: ThemeData(
-            appBarTheme: AppBarTheme(
-              color: Colors.white,
-              elevation: 1,
-              titleTextStyle: TextStyle(color: Colors.black, fontSize: 25),
-              actionsIconTheme: IconThemeData(color: Colors.black),
-            ),
-            textTheme: TextTheme(bodyText2: TextStyle(color: Colors.red))),
-        home: MyApp());
+    return MaterialApp(theme: theme, home: MyApp());
   }
 }
 
@@ -34,10 +26,18 @@ class MyApp extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.add_box_outlined),
             onPressed: () {},
-            iconSize: 30,
           )
         ],
       ),
+      body: TextButton(
+        child: Text('Hi'),
+        onPressed: () {},
+      ),
+      bottomNavigationBar: BottomNavigationBar(items: [
+        BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'home'),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_bag_outlined), label: 'shopping_bag'),
+      ]),
     );
   }
 }
