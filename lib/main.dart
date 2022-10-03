@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
 import 'package:instagram/style.dart';
 
@@ -28,6 +29,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   var tab = 0;
   var fetchedResult = [];
+  var isBottomBarVisible = false;
 
   fetchData() async {
     var response = await http
@@ -49,6 +51,12 @@ class _MyAppState extends State<MyApp> {
     fetchData();
   }
 
+  setBottomBarStatus(isVisible) {
+    setState(() {
+      isBottomBarVisible = isVisible;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,35 +69,80 @@ class _MyAppState extends State<MyApp> {
           )
         ],
       ),
-      body: [Home(result: fetchedResult), Text('Shop page')][tab],
-      bottomNavigationBar: BottomNavigationBar(
-          onTap: (i) {
-            setState(() {
-              tab = i;
-            });
-          },
-          items: [
-            BottomNavigationBarItem(
-                icon: Icon(Icons.home_outlined), label: 'home'),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.shopping_bag_outlined), label: 'shopping_bag'),
-          ]),
+      body: [
+        Home(feeds: fetchedResult, setBottomBarVisible: setBottomBarStatus),
+        Text('Shop page')
+      ][tab],
+      bottomNavigationBar: SizedBox(
+        child: isBottomBarVisible
+            ? BottomNavigationBar(
+                onTap: (i) {
+                  setState(() {
+                    tab = i;
+                  });
+                },
+                items: [
+                    BottomNavigationBarItem(
+                        icon: Icon(Icons.home_outlined), label: 'home'),
+                    BottomNavigationBarItem(
+                        icon: Icon(Icons.shopping_bag_outlined),
+                        label: 'shopping_bag'),
+                  ])
+            : null,
+      ),
     );
   }
 }
 
-class Home extends StatelessWidget {
-  const Home({Key? key, this.result}) : super(key: key);
+class Home extends StatefulWidget {
+  Home({Key? key, this.feeds, this.setBottomBarVisible}) : super(key: key);
 
-  final result;
+  var feeds;
+  final setBottomBarVisible;
+
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  var scrollController = ScrollController();
+
+  fetchResponse(url) async {
+    var response = await http.get(Uri.parse(url));
+    var result = jsonDecode(response.body);
+    setState(() {
+      widget.feeds.add(result);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    scrollController.addListener(() {
+      if (scrollController.position.pixels ==
+          scrollController.position.maxScrollExtent) {
+        fetchResponse('https://codingapple1.github.io/app/more1.json');
+      }
+    });
+    scrollController.addListener(() {
+      if (scrollController.position.userScrollDirection ==
+          ScrollDirection.reverse) {
+        widget.setBottomBarVisible(false);
+      } else if (scrollController.position.userScrollDirection ==
+          ScrollDirection.forward) {
+        widget.setBottomBarVisible(true);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: result.length,
+      controller: scrollController,
+      itemCount: widget.feeds.length,
       itemBuilder: (context, index) {
-        if (result.isNotEmpty) {
-          return Post(result: result, index: index);
+        if (widget.feeds.isNotEmpty) {
+          return Post(result: widget.feeds, index: index);
         }
 
         return CircularProgressIndicator();
