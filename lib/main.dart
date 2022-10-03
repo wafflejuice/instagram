@@ -36,15 +36,7 @@ class _MyAppState extends State<MyApp> {
           )
         ],
       ),
-      body: [
-        ListView.builder(
-          itemCount: 3,
-          itemBuilder: (context, index) {
-            return Post();
-          },
-        ),
-        Text('Shop page')
-      ][tab],
+      body: [Home(), Text('Shop page')][tab],
       bottomNavigationBar: BottomNavigationBar(
           onTap: (i) {
             setState(() {
@@ -61,29 +53,43 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
+class Home extends StatelessWidget {
+  const Home({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: 3,
+      itemBuilder: (context, index) {
+        return Post();
+      },
+    );
+  }
+}
+
 class Post extends StatelessWidget {
   const Post({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-          Image.asset('assets/street.jpg'),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text('favorite 100',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                Text('writer'),
-                Text('content'),
-              ],
-            ),
-          )
-        ],
-      ),
+    return Column(
+      children: [
+        Image.asset('assets/street.jpg'),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('favorite 100',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              Text('writer'),
+              Text('content'),
+            ],
+          ),
+        )
+      ],
     );
   }
 }
