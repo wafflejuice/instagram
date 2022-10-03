@@ -14,8 +14,15 @@ class App extends StatelessWidget {
   }
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  var tab = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -29,15 +36,54 @@ class MyApp extends StatelessWidget {
           )
         ],
       ),
-      body: TextButton(
-        child: Text('Hi'),
-        onPressed: () {},
+      body: [
+        ListView.builder(
+          itemCount: 3,
+          itemBuilder: (context, index) {
+            return Post();
+          },
+        ),
+        Text('Shop page')
+      ][tab],
+      bottomNavigationBar: BottomNavigationBar(
+          onTap: (i) {
+            setState(() {
+              tab = i;
+            });
+          },
+          items: [
+            BottomNavigationBarItem(
+                icon: Icon(Icons.home_outlined), label: 'home'),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.shopping_bag_outlined), label: 'shopping_bag'),
+          ]),
+    );
+  }
+}
+
+class Post extends StatelessWidget {
+  const Post({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(
+        children: [
+          Image.asset('assets/street.jpg'),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text('favorite 100',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                Text('writer'),
+                Text('content'),
+              ],
+            ),
+          )
+        ],
       ),
-      bottomNavigationBar: BottomNavigationBar(items: [
-        BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'home'),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_bag_outlined), label: 'shopping_bag'),
-      ]),
     );
   }
 }
