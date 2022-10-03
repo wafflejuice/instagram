@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -26,12 +27,17 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   var tab = 0;
-  var fetchedResult;
+  var fetchedResult = [];
 
   fetchData() async {
     var response = await http
         .get(Uri.parse('https://codingapple1.github.io/app/data.json'));
-    var result = jsonDecode(response.body);
+
+    var result = [];
+    if (response.statusCode == HttpStatus.ok) {
+      result = jsonDecode(response.body);
+    }
+
     setState(() {
       fetchedResult = result;
     });
@@ -82,16 +88,21 @@ class Home extends StatelessWidget {
     return ListView.builder(
       itemCount: result.length,
       itemBuilder: (context, index) {
-        return Post(result: result, index: index);
+        if (result.isNotEmpty) {
+          return Post(result: result, index: index);
+        }
+
+        return CircularProgressIndicator();
       },
     );
   }
 }
 
 class Post extends StatelessWidget {
-  const Post({Key? key, this.result, required this.index}) : super(key: key);
+  const Post({Key? key, required this.result, required this.index})
+      : super(key: key);
 
-  final result;
+  final List result;
   final int index;
 
   @override
