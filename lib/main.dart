@@ -32,10 +32,29 @@ class _MyAppState extends State<MyApp> {
   var feeds = [];
   var isBottomBarVisible = false;
   var userImage;
+  var userContent;
 
-  pushFeed(feed) {
+  setUserContent(userContent) {
     setState(() {
-      feeds.insert(0, feed);
+      this.userContent = userContent;
+    });
+  }
+
+  pushFeed() {
+    print("userContent = $userContent}");
+
+    var newFeed = {
+      "id": feeds.length,
+      "image": userImage,
+      "likes": 0,
+      "date": "July 25",
+      "content": userContent,
+      "liked": false,
+      "user": "Me"
+    };
+
+    setState(() {
+      feeds.insert(0, newFeed);
     });
   }
 
@@ -87,7 +106,10 @@ class _MyAppState extends State<MyApp> {
               }
 
               Navigator.push(context, MaterialPageRoute(builder: (context) {
-                return Upload(userImage: userImage, pushFeed: pushFeed);
+                return Upload(
+                    userImage: userImage,
+                    setUserContent: setUserContent,
+                    pushFeed: pushFeed);
               }));
             },
           )
@@ -166,7 +188,7 @@ class _HomeState extends State<Home> {
       itemCount: widget.feeds.length,
       itemBuilder: (context, index) {
         if (widget.feeds.isNotEmpty) {
-          return Post(result: widget.feeds, index: index);
+          return Post(feeds: widget.feeds, index: index);
         }
 
         return CircularProgressIndicator();
@@ -176,28 +198,27 @@ class _HomeState extends State<Home> {
 }
 
 class Post extends StatelessWidget {
-  const Post({Key? key, required this.result, required this.index})
-      : super(key: key);
+  Post({Key? key, required this.feeds, required this.index}) : super(key: key);
 
-  final List result;
-  final int index;
+  List feeds;
+  int index;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        result[index]['image'] is String
-            ? Image.network(result[index]['image'])
-            : Image.file(result[index]['image']),
+        feeds[index]['image'].runtimeType == String
+            ? Image.network(feeds[index]['image'])
+            : Image.file(feeds[index]['image']),
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('favorite ${result[index]['likes']}',
+              Text('favorite ${feeds[index]['likes']}',
                   style: TextStyle(fontWeight: FontWeight.bold)),
-              Text(result[index]['user']),
-              Text(result[index]['content']),
+              Text(feeds[index]['user']),
+              Text(feeds[index]['content']),
             ],
           ),
         )
@@ -206,17 +227,12 @@ class Post extends StatelessWidget {
   }
 }
 
-class Upload extends StatefulWidget {
-  Upload({Key? key, this.userImage, this.pushFeed}) : super(key: key);
+class Upload extends StatelessWidget {
+  Upload({Key? key, this.userImage, this.setUserContent, this.pushFeed})
+      : super(key: key);
   var userImage;
+  final setUserContent;
   final pushFeed;
-
-  @override
-  State<Upload> createState() => _UploadState();
-}
-
-class _UploadState extends State<Upload> {
-  var textEditingController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -225,25 +241,21 @@ class _UploadState extends State<Upload> {
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.file(widget.userImage),
-            TextField(controller: textEditingController),
+            Image.file(userImage),
+            TextField(
+              onChanged: (text) {
+                setUserContent(text);
+              },
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 IconButton(
                     onPressed: () {
-                      widget.pushFeed({
-                        "id": 0,
-                        "image": widget.userImage,
-                        "likes": 0,
-                        "date": "July 25",
-                        "content": textEditingController.text,
-                        "liked": false,
-                        "user": "Me"
-                      });
                       Navigator.pop(context);
+                      pushFeed();
                     },
-                    icon: Icon(Icons.check_box)),
+                    icon: Icon(Icons.send)),
                 IconButton(
                     onPressed: () {
                       Navigator.pop(context);
