@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'package:instagram/style.dart';
 
 void main() {
@@ -28,8 +29,15 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   var tab = 0;
-  var fetchedResult = [];
+  var feeds = [];
   var isBottomBarVisible = false;
+  var userImage;
+
+  pushFeed(feed) {
+    setState(() {
+      feeds.insert(0, feed);
+    });
+  }
 
   fetchData() async {
     var response = await http
@@ -41,7 +49,7 @@ class _MyAppState extends State<MyApp> {
     }
 
     setState(() {
-      fetchedResult = result;
+      feeds = result;
     });
   }
 
@@ -65,16 +73,28 @@ class _MyAppState extends State<MyApp> {
         actions: [
           IconButton(
             icon: Icon(Icons.add_box_outlined),
-            onPressed: () {
+            onPressed: () async {
+              var picker = ImagePicker();
+              var image = await picker.pickImage(source: ImageSource.gallery);
+              if (image != null) {
+                setState(() {
+                  userImage = File(image.path);
+                });
+              }
+
+              if (!mounted) {
+                return;
+              }
+
               Navigator.push(context, MaterialPageRoute(builder: (context) {
-                return Upload();
+                return Upload(userImage: userImage, pushFeed: pushFeed);
               }));
             },
           )
         ],
       ),
       body: [
-        Home(feeds: fetchedResult, setBottomBarVisible: setBottomBarStatus),
+        Home(feeds: feeds, setBottomBarVisible: setBottomBarStatus),
         Text('Shop page')
       ][tab],
       bottomNavigationBar: SizedBox(
@@ -166,7 +186,9 @@ class Post extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Image.network(result[index]['image']),
+        result[index]['image'] is String
+            ? Image.network(result[index]['image'])
+            : Image.file(result[index]['image']),
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -184,8 +206,17 @@ class Post extends StatelessWidget {
   }
 }
 
-class Upload extends StatelessWidget {
-  const Upload({Key? key}) : super(key: key);
+class Upload extends StatefulWidget {
+  Upload({Key? key, this.userImage, this.pushFeed}) : super(key: key);
+  var userImage;
+  final pushFeed;
+
+  @override
+  State<Upload> createState() => _UploadState();
+}
+
+class _UploadState extends State<Upload> {
+  var textEditingController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -194,12 +225,32 @@ class Upload extends StatelessWidget {
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('image upload scene'),
-            IconButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                icon: Icon(Icons.close))
+            Image.file(widget.userImage),
+            TextField(controller: textEditingController),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                    onPressed: () {
+                      widget.pushFeed({
+                        "id": 0,
+                        "image": widget.userImage,
+                        "likes": 0,
+                        "date": "July 25",
+                        "content": textEditingController.text,
+                        "liked": false,
+                        "user": "Me"
+                      });
+                      Navigator.pop(context);
+                    },
+                    icon: Icon(Icons.check_box)),
+                IconButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: Icon(Icons.close))
+              ],
+            )
           ],
         ));
   }
