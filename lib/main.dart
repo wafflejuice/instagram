@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:instagram/style.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(App());
@@ -56,6 +57,13 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       feeds.insert(0, newFeed);
     });
+  }
+
+  saveData() async {
+    var storage = await SharedPreferences.getInstance();
+    storage.setString('key', 'value');
+    var data = storage.getString('key');
+    print(data);
   }
 
   fetchData() async {
