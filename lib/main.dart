@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
@@ -223,15 +224,43 @@ class Post extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              GestureDetector(
+                child: Text(feeds[index]['user']),
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                          pageBuilder: (c, a1, a2) => Profile(),
+                          transitionsBuilder: (c, a1, a2, child) =>
+                              SlideTransition(
+                                position: Tween(
+                                        begin: Offset(-1.0, 0.0),
+                                        end: Offset(0.0, 0.0))
+                                    .animate(a1),
+                                child: child,
+                              )));
+                },
+              ),
               Text('favorite ${feeds[index]['likes']}',
                   style: TextStyle(fontWeight: FontWeight.bold)),
-              Text(feeds[index]['user']),
+              Text(feeds[index]['date']),
               Text(feeds[index]['content']),
             ],
           ),
         )
       ],
     );
+  }
+}
+
+class Profile extends StatelessWidget {
+  const Profile({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(appBar: AppBar(), body: Text('profile page'));
   }
 }
 
