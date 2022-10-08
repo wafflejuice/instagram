@@ -258,9 +258,26 @@ class Post extends StatelessWidget {
 
 class Store1 extends ChangeNotifier {
   var name = 'peter parker';
+  var followerCount = 0;
+  var isFollowing = false;
 
   changeName(name) {
     this.name = name;
+    notifyListeners();
+  }
+
+  addFollowerCount() {
+    followerCount++;
+    notifyListeners();
+  }
+
+  minusFollowerCount() {
+    followerCount--;
+    notifyListeners();
+  }
+
+  toggleFollowingState() {
+    isFollowing = !isFollowing;
     notifyListeners();
   }
 }
@@ -273,16 +290,26 @@ class Profile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text(context.watch<Store1>().name)),
-        body: Column(
-          children: [
-            ElevatedButton(
-                onPressed: () {
-                  context.read<Store1>().changeName('Dr. Octavius');
-                },
-                child: Text('button'))
-          ],
-        ));
+      appBar: AppBar(title: Text(context.watch<Store1>().name)),
+      body: ListView.builder(
+          itemCount: 1,
+          itemBuilder: (context, index) {
+            return ListTile(
+              leading: Image.asset('assets/profile_image.png'),
+              title: Text('${context.watch<Store1>().followerCount} followers'),
+              trailing: ElevatedButton(
+                  onPressed: () {
+                    if (context.read<Store1>().isFollowing) {
+                      context.read<Store1>().minusFollowerCount();
+                    } else {
+                      context.read<Store1>().addFollowerCount();
+                    }
+                    context.read<Store1>().toggleFollowingState();
+                  },
+                  child: Text('Follow')),
+            );
+          }),
+    );
   }
 }
 
