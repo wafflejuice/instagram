@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:instagram/style.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -18,7 +19,9 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(theme: theme, home: MyApp());
+    return ChangeNotifierProvider(
+        create: (c) => Store1(),
+        child: MaterialApp(theme: theme, home: MyApp()));
   }
 }
 
@@ -253,6 +256,15 @@ class Post extends StatelessWidget {
   }
 }
 
+class Store1 extends ChangeNotifier {
+  var name = 'peter parker';
+
+  changeName(name) {
+    this.name = name;
+    notifyListeners();
+  }
+}
+
 class Profile extends StatelessWidget {
   const Profile({
     Key? key,
@@ -260,7 +272,17 @@ class Profile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(appBar: AppBar(), body: Text('profile page'));
+    return Scaffold(
+        appBar: AppBar(title: Text(context.watch<Store1>().name)),
+        body: Column(
+          children: [
+            ElevatedButton(
+                onPressed: () {
+                  context.read<Store1>().changeName('Dr. Octavius');
+                },
+                child: Text('button'))
+          ],
+        ));
   }
 }
 
