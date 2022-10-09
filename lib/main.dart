@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:instagram/notification.dart';
 import 'package:instagram/style.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -88,6 +89,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    initNotification(context);
     fetchData();
   }
 
@@ -100,6 +102,12 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        child: Text('+'),
+        onPressed: () {
+          showNotification();
+        },
+      ),
       appBar: AppBar(
         title: Text('Instagram'),
         actions: [
