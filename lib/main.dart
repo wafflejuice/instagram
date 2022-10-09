@@ -19,9 +19,10 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-        create: (c) => Store1(),
-        child: MaterialApp(theme: theme, home: MyApp()));
+    return MultiProvider(providers: [
+      ChangeNotifierProvider(create: (c) => Store1()),
+      ChangeNotifierProvider(create: (c) => Store2()),
+    ], child: MaterialApp(theme: theme, home: MyApp()));
   }
 }
 
@@ -260,6 +261,15 @@ class Store1 extends ChangeNotifier {
   var name = 'peter parker';
   var followerCount = 0;
   var isFollowing = false;
+  var profileImages = [];
+
+  fetchProfileImages() async {
+    var response = await http
+        .get(Uri.parse('https://codingapple1.github.io/app/profile.json'));
+    var result = jsonDecode(response.body);
+    profileImages = result;
+    notifyListeners();
+  }
 
   changeName(name) {
     this.name = name;
@@ -273,31 +283,65 @@ class Store1 extends ChangeNotifier {
   }
 }
 
-class Profile extends StatelessWidget {
+class Store2 extends ChangeNotifier {
+  var name = 'john smith';
+}
+
+class Profile extends StatefulWidget {
   const Profile({
     Key? key,
   }) : super(key: key);
 
   @override
+  State<Profile> createState() => _ProfileState();
+}
+
+class _ProfileState extends State<Profile> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<Store1>().fetchProfileImages();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(context.watch<Store1>().name)),
-      body: ListView.builder(
-          itemCount: 1,
-          itemBuilder: (context, index) {
-            return ListTile(
-              leading: CircleAvatar(
-                radius: 25,
-                backgroundColor: Colors.grey,
-              ),
-              title: Text('${context.watch<Store1>().followerCount} followers'),
-              trailing: ElevatedButton(
-                  onPressed: () {
-                    context.read<Store1>().toggleFollowingState();
-                  },
-                  child: Text('Follow')),
-            );
-          }),
+        appBar: AppBar(title: Text(context.watch<Store2>().name)),
+        body: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: ProfileHeader(),
+            ),
+            SliverGrid(
+              delegate: SliverChildBuilderDelegate(
+                  (c, i) => Container(color: Colors.grey),
+                  childCount: 3),
+              gridDelegate:
+                  SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+            ),
+          ],
+        ));
+  }
+}
+
+class ProfileHeader extends StatelessWidget {
+  const ProfileHeader({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: CircleAvatar(
+        radius: 25,
+        backgroundColor: Colors.grey,
+      ),
+      title: Text('${context.watch<Store1>().followerCount} followers'),
+      trailing: ElevatedButton(
+          onPressed: () {
+            context.read<Store1>().toggleFollowingState();
+          },
+          child: Text('Follow')),
     );
   }
 }
