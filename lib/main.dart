@@ -266,17 +266,8 @@ class Store1 extends ChangeNotifier {
     notifyListeners();
   }
 
-  addFollowerCount() {
-    followerCount++;
-    notifyListeners();
-  }
-
-  minusFollowerCount() {
-    followerCount--;
-    notifyListeners();
-  }
-
   toggleFollowingState() {
+    isFollowing ? followerCount-- : followerCount++;
     isFollowing = !isFollowing;
     notifyListeners();
   }
@@ -295,15 +286,13 @@ class Profile extends StatelessWidget {
           itemCount: 1,
           itemBuilder: (context, index) {
             return ListTile(
-              leading: Image.asset('assets/profile_image.png'),
+              leading: CircleAvatar(
+                radius: 25,
+                backgroundColor: Colors.grey,
+              ),
               title: Text('${context.watch<Store1>().followerCount} followers'),
               trailing: ElevatedButton(
                   onPressed: () {
-                    if (context.read<Store1>().isFollowing) {
-                      context.read<Store1>().minusFollowerCount();
-                    } else {
-                      context.read<Store1>().addFollowerCount();
-                    }
                     context.read<Store1>().toggleFollowingState();
                   },
                   child: Text('Follow')),
