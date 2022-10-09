@@ -314,10 +314,11 @@ class _ProfileState extends State<Profile> {
             ),
             SliverGrid(
               delegate: SliverChildBuilderDelegate(
-                  (c, i) => Container(color: Colors.grey),
-                  childCount: 3),
+                  (c, i) =>
+                      Image.network(context.watch<Store1>().profileImages[i]),
+                  childCount: context.watch<Store1>().profileImages.length),
               gridDelegate:
-                  SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+                  SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
             ),
           ],
         ));
